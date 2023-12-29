@@ -9,7 +9,6 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(autoware_auto_control_msgs REQUIRED)
-find_package(carla_msgs REQUIRED)
 find_package(ackermann_msgs REQUIRED)
 
 include_directories(include)
