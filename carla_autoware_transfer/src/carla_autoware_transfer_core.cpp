@@ -269,7 +269,7 @@ void CarlaTopicTransfer::callbackIMU(
   const sensor_msgs::msg::Imu::ConstSharedPtr imu_msg_ptr)
 {
   sensor_msgs::msg::Imu veh_imu_ = *imu_msg_ptr;
-  veh_imu_.header.frame_id = "tamagawa/imu_link";
+  veh_imu_.header.frame_id = "imu_link";
 
   carla_imu_pub_->publish(veh_imu_);
 }
