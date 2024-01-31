@@ -44,7 +44,6 @@ private:
   const std::deque<nav_msgs::msg::Odometry> & vehicle_odom_queue_);
   autoware_auto_perception_msgs::msg::DetectedObjects AutowareObstacleInfo(
   const std::deque<derived_object_msgs::msg::ObjectArray>& carla_objects_queue_);
-  void callbackCarlaVehicleStatus(const carla_msgs::msg::CarlaEgoVehicleStatus::ConstSharedPtr carla_status_msg_ptr);
   void callbackIMU(const sensor_msgs::msg::Imu::ConstSharedPtr imu_msg_ptr);
   void callbackGNSS(const sensor_msgs::msg::NavSatFix::ConstSharedPtr gnss_msg_ptr);
 
@@ -61,8 +60,6 @@ private:
     vehicle_odom_sub_;
   rclcpp::Subscription<derived_object_msgs::msg::ObjectArray>::SharedPtr
     carla_objects_sub_;
-  rclcpp::Subscription<carla_msgs::msg::CarlaEgoVehicleStatus>::SharedPtr
-    carla_status_sub_;
   rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr
     carla_imu_sub_;
   rclcpp::Subscription<sensor_msgs::msg::NavSatFix>::SharedPtr
@@ -70,8 +67,6 @@ private:
 
 
 // Publishers
-  rclcpp::Publisher<autoware_auto_vehicle_msgs::msg::VelocityReport>::SharedPtr velocity_report_pub_;
-  rclcpp::Publisher<autoware_auto_vehicle_msgs::msg::SteeringReport>::SharedPtr steering_report_pub_;
   rclcpp::Publisher<autoware_auto_perception_msgs::msg::DetectedObjects>::SharedPtr carla_objects_pub_;
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr carla_nav_pub_;
   rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr carla_imu_pub_;

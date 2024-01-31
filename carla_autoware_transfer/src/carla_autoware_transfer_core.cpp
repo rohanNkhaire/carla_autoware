@@ -87,26 +87,6 @@ autoware_auto_perception_msgs::msg::DetectedObjects CarlaTopicTransfer::Autoware
     detected_kin_obj_.has_twist_covariance = false;
     detected_kin_obj_.has_twist = true;
     detected_kin_obj_.orientation_availability = 0;
-    /*
-    // TF from map to base
-    pose_in_.header = carla_object.header;
-    pose_in_.pose = carla_object.pose;
-    pose_in_.header.stamp = rclcpp::Time();
-
-    
-    // Transforms the pose between the source frame and target frame
-    //tf_buffer_->canTransform("base_link", "map", rclcpp::Time(),tf2::Duration(std::chrono::seconds(1)))
-    try
-    {
-      tf_buffer_->transform<geometry_msgs::msg::PoseStamped>(pose_in_, pose_out_, "base_link",
-          tf2::Duration(std::chrono::seconds(1)));
-    }
-    catch (const tf2::TransformException & ex)
-    {
-      RCLCPP_WARN(get_logger(),"Could not transform objects from map to base_link.");
-      return detected_objects_;
-    }
-    */
 
     detected_kin_obj_.pose_with_covariance.pose = carla_object.pose;
     detected_kin_obj_.twist_with_covariance.twist = carla_object.twist;
@@ -170,10 +150,6 @@ CarlaTopicTransfer::CarlaTopicTransfer()
   carla_objects_sub_ = create_subscription<derived_object_msgs::msg::ObjectArray>(
     "carla/ego_vehicle/objects", rclcpp::QoS{100},
     std::bind(&CarlaTopicTransfer::callbackCarlaObjects, this, std::placeholders::_1));
-    
-  carla_status_sub_ = create_subscription<carla_msgs::msg::CarlaEgoVehicleStatus>(
-    "carla/ego_vehicle/vehicle_status", rclcpp::QoS{100},
-    std::bind(&CarlaTopicTransfer::callbackCarlaVehicleStatus, this, std::placeholders::_1));
 
   carla_imu_sub_ = create_subscription<sensor_msgs::msg::Imu>(
     "carla/ego_vehicle/imu", rclcpp::QoS{100},
@@ -184,12 +160,6 @@ CarlaTopicTransfer::CarlaTopicTransfer()
     std::bind(&CarlaTopicTransfer::callbackGNSS, this, std::placeholders::_1));            
 
   // Publishers
-
-  velocity_report_pub_ = create_publisher<autoware_auto_vehicle_msgs::msg::VelocityReport>(
-    "vehicle/status/velocity_status", rclcpp::QoS{10});
-
-  steering_report_pub_ = create_publisher<autoware_auto_vehicle_msgs::msg::SteeringReport>(
-    "vehicle/status/steering_status", rclcpp::QoS{10});  
 
   carla_objects_pub_ = create_publisher<autoware_auto_perception_msgs::msg::DetectedObjects>(
     "perception/object_recognition/detection/carla/autoware_objects", rclcpp::QoS{10});
@@ -227,14 +197,6 @@ void CarlaTopicTransfer::callbackOdometry(
     publishGroundTruthLocalization(vehicle_odom_queue_);  
   }
 
-  // publishing data  
-  autoware_auto_vehicle_msgs::msg::VelocityReport velocity_report_;
-  velocity_report_.header = velocity_report_raw.header;
-  velocity_report_.longitudinal_velocity = velocity_report_raw.longitudinal_velocity;
-  velocity_report_.lateral_velocity = velocity_report_raw.lateral_velocity;
-  velocity_report_.heading_rate = velocity_report_raw.heading_rate;
-  velocity_report_pub_->publish(velocity_report_);
-
   vehicle_odom_queue_.clear();
 }
 
@@ -253,18 +215,6 @@ void CarlaTopicTransfer::callbackCarlaObjects(
   carla_objects_pub_->publish(carla_objects_);
 
   carla_objects_queue_.clear();
-}
-
-void CarlaTopicTransfer::callbackCarlaVehicleStatus(
-  const carla_msgs::msg::CarlaEgoVehicleStatus::ConstSharedPtr carla_status_msg_ptr)
-{
-  carla_msgs::msg::CarlaEgoVehicleStatus carla_steering_ = *carla_status_msg_ptr;
-
-  // publishing data  
-  autoware_auto_vehicle_msgs::msg::SteeringReport autoware_steering_;
-  autoware_steering_.stamp = carla_steering_.header.stamp;
-  autoware_steering_.steering_tire_angle = carla_steering_.control.steer == 0.0 ? 0.0 : -carla_steering_.control.steer;
-  steering_report_pub_->publish(autoware_steering_);
 }
 
 void CarlaTopicTransfer::callbackIMU(
