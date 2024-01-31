@@ -44,8 +44,6 @@ private:
   const std::deque<nav_msgs::msg::Odometry> & vehicle_odom_queue_);
   autoware_auto_perception_msgs::msg::DetectedObjects AutowareObstacleInfo(
   const std::deque<derived_object_msgs::msg::ObjectArray>& carla_objects_queue_);
-  void callbackIMU(const sensor_msgs::msg::Imu::ConstSharedPtr imu_msg_ptr);
-  void callbackGNSS(const sensor_msgs::msg::NavSatFix::ConstSharedPtr gnss_msg_ptr);
 
   void setupTF();
 
@@ -59,18 +57,12 @@ private:
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr
     vehicle_odom_sub_;
   rclcpp::Subscription<derived_object_msgs::msg::ObjectArray>::SharedPtr
-    carla_objects_sub_;
-  rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr
-    carla_imu_sub_;
-  rclcpp::Subscription<sensor_msgs::msg::NavSatFix>::SharedPtr
-    carla_gnss_sub_;     
+    carla_objects_sub_;    
 
 
 // Publishers
   rclcpp::Publisher<autoware_auto_perception_msgs::msg::DetectedObjects>::SharedPtr carla_objects_pub_;
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr carla_nav_pub_;
-  rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr carla_imu_pub_;
-  rclcpp::Publisher<sensor_msgs::msg::NavSatFix>::SharedPtr carla_gnss_pub_;
   rclcpp::Publisher<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr carla_twist_pub_;
 
   bool groundtruth_localization_;

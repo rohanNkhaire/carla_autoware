@@ -149,15 +149,7 @@ CarlaTopicTransfer::CarlaTopicTransfer()
 
   carla_objects_sub_ = create_subscription<derived_object_msgs::msg::ObjectArray>(
     "carla/ego_vehicle/objects", rclcpp::QoS{100},
-    std::bind(&CarlaTopicTransfer::callbackCarlaObjects, this, std::placeholders::_1));
-
-  carla_imu_sub_ = create_subscription<sensor_msgs::msg::Imu>(
-    "carla/ego_vehicle/imu", rclcpp::QoS{100},
-    std::bind(&CarlaTopicTransfer::callbackIMU, this, std::placeholders::_1));  
-
-  carla_gnss_sub_ = create_subscription<sensor_msgs::msg::NavSatFix>(
-    "carla/ego_vehicle/gnss", rclcpp::QoS{100},
-    std::bind(&CarlaTopicTransfer::callbackGNSS, this, std::placeholders::_1));            
+    std::bind(&CarlaTopicTransfer::callbackCarlaObjects, this, std::placeholders::_1));          
 
   // Publishers
 
@@ -166,12 +158,6 @@ CarlaTopicTransfer::CarlaTopicTransfer()
 
   carla_nav_pub_ = create_publisher<nav_msgs::msg::Odometry>(
     "localization/kinematic_state", rclcpp::QoS{10});
-
-  carla_imu_pub_ = create_publisher<sensor_msgs::msg::Imu>(
-    "sensing/imu/tamagawa/imu_raw", rclcpp::QoS{10});
-
-  carla_gnss_pub_ = create_publisher<sensor_msgs::msg::NavSatFix>(
-    "sensing/gnss/ublox/nav_sat_fix", rclcpp::QoS{10});     
 
   carla_twist_pub_ = create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>(
     "localization/twist_estimator/twist_with_covariance", rclcpp::QoS{10});    
@@ -215,21 +201,4 @@ void CarlaTopicTransfer::callbackCarlaObjects(
   carla_objects_pub_->publish(carla_objects_);
 
   carla_objects_queue_.clear();
-}
-
-void CarlaTopicTransfer::callbackIMU(
-  const sensor_msgs::msg::Imu::ConstSharedPtr imu_msg_ptr)
-{
-  sensor_msgs::msg::Imu veh_imu_ = *imu_msg_ptr;
-  veh_imu_.header.frame_id = "tamagawa/imu_link";
-
-  carla_imu_pub_->publish(veh_imu_);
-}
-
-void CarlaTopicTransfer::callbackGNSS(const sensor_msgs::msg::NavSatFix::ConstSharedPtr gnss_msg_ptr)
-{
-  sensor_msgs::msg::NavSatFix veh_gnss_ = *gnss_msg_ptr;
-  veh_gnss_.header.frame_id = "gnss_link";
-
-  carla_gnss_pub_->publish(veh_gnss_); 
 }
