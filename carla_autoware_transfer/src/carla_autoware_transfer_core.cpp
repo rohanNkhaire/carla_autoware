@@ -60,7 +60,7 @@ autoware_auto_perception_msgs::msg::DetectedObjects CarlaTopicTransfer::Autoware
   // populating header field
   const auto latest_carla_object_stamp = rclcpp::Time(carla_objects_queue_.back().header.stamp);
   detected_objects_.header.stamp = latest_carla_object_stamp;
-  detected_objects_.header.frame_id = "base_link";
+  detected_objects_.header.frame_id = "map";
 
   if (carla_objects_queue_.back().objects.empty())
   {
@@ -87,12 +87,13 @@ autoware_auto_perception_msgs::msg::DetectedObjects CarlaTopicTransfer::Autoware
     detected_kin_obj_.has_twist_covariance = false;
     detected_kin_obj_.has_twist = true;
     detected_kin_obj_.orientation_availability = 0;
+    /*
     // TF from map to base
     pose_in_.header = carla_object.header;
     pose_in_.pose = carla_object.pose;
     pose_in_.header.stamp = rclcpp::Time();
 
-  
+    
     // Transforms the pose between the source frame and target frame
     //tf_buffer_->canTransform("base_link", "map", rclcpp::Time(),tf2::Duration(std::chrono::seconds(1)))
     try
@@ -105,8 +106,9 @@ autoware_auto_perception_msgs::msg::DetectedObjects CarlaTopicTransfer::Autoware
       RCLCPP_WARN(get_logger(),"Could not transform objects from map to base_link.");
       return detected_objects_;
     }
+    */
 
-    detected_kin_obj_.pose_with_covariance.pose = pose_out_.pose;
+    detected_kin_obj_.pose_with_covariance.pose = carla_object.pose;
     detected_kin_obj_.twist_with_covariance.twist = carla_object.twist;
 
     // ObjectClassification
