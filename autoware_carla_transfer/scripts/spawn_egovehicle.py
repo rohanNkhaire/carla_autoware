@@ -13,7 +13,7 @@ from ros_compatibility.node import CompatibleNode
 from carla_msgs.msg import CarlaActorList
 from carla_msgs.srv import SpawnObject, DestroyObject
 from diagnostic_msgs.msg import KeyValue
-from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Pose, PoseWithCovarianceStamped
 
 # ==============================================================================
 # -- CarlaSpawnObjects ------------------------------------------------------------
@@ -38,8 +38,24 @@ class CarlaSpawnObjects(CompatibleNode):
         self.vehicles_sensors = []
         self.global_sensors = []
 
+        self.egovehicle_pose = Pose()
+
+        # Pose for spawning ego-vehicle
+        self.pose_subscriber = self.new_subscription(
+            PoseWithCovarianceStamped,
+            "/localization/pose_estimator/pose_with_covariance",
+            self.ego_pose_update,
+            qos_profile=10
+        )
+
         self.spawn_object_service = self.new_client(SpawnObject, "/carla/spawn_object")
         self.destroy_object_service = self.new_client(DestroyObject, "/carla/destroy_object")
+
+    def ego_pose_update(self, ego_pose):
+        self.egovehicle_pose = ego_pose.pose.pose
+        # offset for vehicle spawning on the road
+        self.egovehicle_pose.position.z += 2.0
+        
 
     def spawn_object(self, spawn_object_request):
         response_id = -1
@@ -151,6 +167,10 @@ class CarlaSpawnObjects(CompatibleNode):
                     except KeyError as e:
                         self.logerr("{}: Could not use the spawn point from config file, ".format(vehicle["id"]) +
                                     "the mandatory attribute {} is missing, a random spawn point will be used".format(e))
+                
+                if "spawn_point" not in vehicle and spawn_param_used is False:
+                    spawn_point = self.egovehicle_pose
+                    self.loginfo("Spawn point from /localization/pose_estimator/pose_with_covariance topic")
 
                 if spawn_point is None:
                     # pose not specified, ask for a random one in the service call

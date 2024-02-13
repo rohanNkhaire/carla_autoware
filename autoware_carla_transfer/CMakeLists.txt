@@ -7,6 +7,7 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(autoware_auto_control_msgs REQUIRED)
 find_package(ackermann_msgs REQUIRED)
@@ -22,6 +23,15 @@ ament_target_dependencies(${PROJECT_NAME} rclcpp autoware_auto_control_msgs acke
 install(TARGETS
 ${PROJECT_NAME}
 DESTINATION lib/${PROJECT_NAME}
+)
+
+# Install Python modules
+ament_python_install_package(${PROJECT_NAME})
+# Install Python executables
+install(PROGRAMS
+  scripts/spawn_egovehicle.py
+  scripts/dbw_actuation.py
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)
