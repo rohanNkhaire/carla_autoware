@@ -38,14 +38,14 @@ class CarlaSpawnObjects(CompatibleNode):
         self.vehicles_sensors = []
         self.global_sensors = []
 
-        self.egovehicle_pose = Pose()
+        self.egovehicle_pose = None
 
         # Pose for spawning ego-vehicle
         self.pose_subscriber = self.new_subscription(
             PoseWithCovarianceStamped,
             "/localization/pose_estimator/pose_with_covariance",
             self.ego_pose_update,
-            qos_profile=10
+            qos_profile=1
         )
 
         self.spawn_object_service = self.new_client(SpawnObject, "/carla/spawn_object")
@@ -78,6 +78,7 @@ class CarlaSpawnObjects(CompatibleNode):
 
         :return:
         """
+
         # Read sensors from file
         if not self.objects_definition_file or not os.path.exists(self.objects_definition_file):
             raise RuntimeError(
@@ -362,12 +363,13 @@ def main(args=None):
         roscomp.on_shutdown(spawn_objects_node.destroy)
     except KeyboardInterrupt:
         roscomp.logerr("Could not initialize CarlaSpawnObjects. Shutting down.")
-
+    
     if spawn_objects_node:
         try:
             spawn_objects_node.spawn_objects()
             try:
                 spawn_objects_node.spin()
+                
             except (ROSInterruptException, ServiceException, KeyboardInterrupt):
                 pass
         except (ROSInterruptException, ServiceException, KeyboardInterrupt):
