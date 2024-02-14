@@ -39,7 +39,7 @@ void CarlaTopicTransfer::publishGroundTruthLocalization(const std::deque<nav_msg
   transformStamped.child_frame_id = "base_link";
   transformStamped.transform.translation.x = vehicle_odom_queue_.back().pose.pose.position.x;
   transformStamped.transform.translation.y = vehicle_odom_queue_.back().pose.pose.position.y;
-  transformStamped.transform.translation.z = 0.0;
+  transformStamped.transform.translation.z = vehicle_odom_queue_.back().pose.pose.position.z;
   transformStamped.transform.rotation.x = 0.0;
   transformStamped.transform.rotation.y = 0.0;
   transformStamped.transform.rotation.z = vehicle_odom_queue_.back().pose.pose.orientation.z;
