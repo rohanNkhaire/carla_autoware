@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Control Carla ego vehicle by using AckermannDrive messages from Mache's dbw 
@@ -43,8 +43,7 @@ class CarlaAckermannControl(CompatibleNode):
         """
         super(CarlaAckermannControl, self).__init__("carla_ackermann_control")
 
-        self.control_loop_rate = self.get_param("control_loop_rate", 0.02)
-        self.last_ackermann_msg_received_sec =  self.get_time()
+        self.control_loop_rate = self.get_param("control_loop_rate", 0.03)
         self.role_name = self.get_param('role_name', 'ego_vehicle')
 
         self.throttle_pedal = 0.0
@@ -124,7 +123,7 @@ class CarlaAckermannControl(CompatibleNode):
 
     def steering_command_updated(self, steering_autoware):
         """
-        Get the throttle pedal from dataspeed dbw
+        Get the wheel steering angle from steering status
         """
         self.steering_angle = steering_autoware.steering_tire_angle
 
@@ -137,13 +136,9 @@ class CarlaAckermannControl(CompatibleNode):
         #self.control_stop_and_reverse()
         if not self.info.output.hand_brake:
             self.update_drive_vehicle_control_command()
-
-            # only send out the Carla Control Command if AckermannDrive messages are
-            # received in the last second (e.g. to allows manually controlling the vehicle)
-            if (self.last_ackermann_msg_received_sec + 1.0) > \
-                    self.get_time():
-                self.info.output.header = self.get_msg_header()
-                self.carla_control_publisher.publish(self.info.output)
+            # Publish vehicle command
+            self.info.output.header = self.get_msg_header()
+            self.carla_control_publisher.publish(self.info.output)
 
     def control_steering(self):
         """
@@ -205,7 +200,7 @@ class CarlaAckermannControl(CompatibleNode):
         """
 
         self.info.output.throttle = self.throttle_pedal
-        self.info.outout.brake = self.brake_pedal
+        self.info.output.brake = self.brake_pedal
 
     # from ego vehicle
     def send_ego_vehicle_control_info_msg(self):
