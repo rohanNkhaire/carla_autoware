@@ -31,6 +31,7 @@ ament_python_install_package(${PROJECT_NAME})
 install(PROGRAMS
   scripts/spawn_egovehicle.py
   scripts/dbw_actuation.py
+  scripts/sync_without_dynamics.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
