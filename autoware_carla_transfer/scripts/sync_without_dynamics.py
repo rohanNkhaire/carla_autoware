@@ -120,17 +120,19 @@ class NoDynamicsRelay(CompatibleNode):
         # Set the ego vehicle
         while len(self.actor_list) == 0:
             logging.warning("Searching Actors in the world") 
-            self.actor_list = world.get_actors()     
+            self.actor_list = world.get_actors()
+            print(self.actor_list)     
             time.sleep(2.0)
 
+    
         for actor in self.actor_list:
-            if actor.type_id != "spectator":
-                if actor.attributes["role_name"] == "ego_vehicle":
-                    self.vehicle = self.actor_list.find(actor.id)
-                    self.ego_actor = actor   
-
+            if actor.attributes['role_name'] == 'ego_vehicle':
+                self.vehicle = self.actor_list.find(actor.id)
+                self.ego_actor = actor
+                break   
+        
         logging.warning("Found ego-vehicle")            
-        self.vehicle.set_enable_gravity(False)
+        #self.vehicle.set_enable_gravity(False)
         def loop(timer_event=None):
             self.vehicle_relay_cycle()
 
