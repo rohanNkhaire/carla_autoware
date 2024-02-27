@@ -9,7 +9,8 @@ import logging
 import numpy
 import carla
 import time
-
+import rclpy
+from tf_transformations import euler_from_quaternion, quaternion_from_euler
 import carla_common.transforms as trans
 import ros_compatibility as roscomp
 from ros_compatibility.node import CompatibleNode
@@ -38,7 +39,7 @@ class NoDynamicsRelay(CompatibleNode):
         self.vehicle = None
         self.ego_actor = None
         self.actor_list = []
-
+        self.map = None
         # variables init
         self.veh_velocity = 0.0
         self.ang_velocity = 0.0
@@ -98,7 +99,22 @@ class NoDynamicsRelay(CompatibleNode):
         print(self.veh_velocity)
         '''
 
+
+        # Assigning proper altitude
+        veh_wayp = self.map.get_waypoint(self.vehicle.get_location(), project_to_road=True, lane_type=(carla.LaneType.Driving))
+        self.veh_pose.position.z = veh_wayp.transform.location.z
+
         # Relay Pose
+        # Removing roll and pitch
+        veh_quat = [self.veh_pose.orientation.x, self.veh_pose.orientation.y, self.veh_pose.orientation.z, self.veh_pose.orientation.w]
+        (roll, pitch, yaw) = euler_from_quaternion(veh_quat)
+
+        refined_quat = quaternion_from_euler(0, 0, yaw)
+        self.veh_pose.orientation.x = refined_quat[0]
+        self.veh_pose.orientation.y = refined_quat[1]
+        self.veh_pose.orientation.z = refined_quat[2]
+        self.veh_pose.orientation.w = refined_quat[3]
+
         ego_pose = trans.ros_pose_to_carla_transform(self.veh_pose)
         self.vehicle.set_transform(ego_pose)
 
@@ -115,6 +131,7 @@ class NoDynamicsRelay(CompatibleNode):
             client.set_timeout(2000.0)
 
             world = client.get_world()
+            self.map = world.get_map()
         except:
             pass
         # Set the ego vehicle
@@ -126,7 +143,7 @@ class NoDynamicsRelay(CompatibleNode):
 
     
         for actor in self.actor_list:
-            if actor.attributes['role_name'] == 'ego_vehicle':
+            if 'role_name' in actor.attributes and actor.attributes['role_name'] == 'ego_vehicle':
                 self.vehicle = self.actor_list.find(actor.id)
                 self.ego_actor = actor
                 break   
