@@ -14,8 +14,6 @@
   
   <depend>nav_msgs</depend>
   <depend>derived_object_msgs</depend>
-  <depend>sensor_msgs</depend>
-  <depend>geoemtry_msgs</depend>
   <depend>autoware_auto_vehicle_msgs</depend>
   <depend>autoware_auto_perception_msgs</depend>
   <depend>carla_msgs</depend>
